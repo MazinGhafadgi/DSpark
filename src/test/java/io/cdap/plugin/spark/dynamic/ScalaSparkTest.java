@@ -392,6 +392,16 @@ public class ScalaSparkTest extends HydratorTestBase {
     File testFolder = TEMP_FOLDER.newFolder("scalaSinkDataframeOutput");
     File outputFolder = new File(testFolder, "output");
     StringWriter codeWriter = new StringWriter();
+
+    System.out.println("def sink(df: DataFrame) : Unit = {");
+    System.out.println("  val splitted = df.explode(\"body\", \"word\") { ");
+    System.out.println("    line: String => line.split(\"\\\\s+\")");
+    System.out.println("  }");
+    System.out.println("  splitted.registerTempTable(\"splitted\")");
+    System.out.println("  val query = \"SELECT CONCAT(word, ' ', count(*)) FROM splitted GROUP BY word\"");
+    System.out.println("  val out = splitted.sqlContext.sql(query)");
+    System.out.println("  out.write.format(\"text\").save(\"" + outputFolder.getAbsolutePath() + "\")");
+    System.out.println("}");
     try (PrintWriter printer = new PrintWriter(codeWriter, true)) {
       printer.println("def sink(df: DataFrame) : Unit = {");
       printer.println("  val splitted = df.explode(\"body\", \"word\") { ");
